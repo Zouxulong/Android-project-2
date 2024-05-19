@@ -10,6 +10,8 @@ import android.view.View;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public class Clock extends View {
 
@@ -92,7 +94,7 @@ public class Clock extends View {
 
         mWidth = getHeight() > getWidth() ? getWidth() : getHeight();
 
-        int halfWidth = mWidth / 2;
+        final int halfWidth = mWidth / 2;
         mCenterX = halfWidth;
         mCenterY = halfWidth;
         mRadius = halfWidth;
@@ -106,6 +108,15 @@ public class Clock extends View {
         drawNeedles(canvas);
 
         // todo 每一秒刷新一次，让指针动起来
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                postDelayed(this,1000);
+                invalidate();
+            }
+        };
+
+        postDelayed(runnable,1000);
 
     }
 
@@ -167,6 +178,8 @@ public class Clock extends View {
         drawPointer(canvas, 2, nowSeconds);
         // 画分针
         // todo 画分针
+        int PART_MINUTE = nowSeconds / 60;
+        drawPointer(canvas,1,nowMinutes + PART_MINUTE);
         // 画时针
         int part = nowMinutes / 12;
         drawPointer(canvas, 0, 5 * nowHours + part);
@@ -189,7 +202,9 @@ public class Clock extends View {
                 break;
             case 1:
                 // todo 画分针，设置分针的颜色
-
+                degree = value * UNIT_DEGREE;
+                mNeedlePaint.setColor(Color.RED);
+                pointerHeadXY = getPointerHeadXY(MINUTE_POINTER_LENGTH,degree);
                 break;
             case 2:
                 degree = value * UNIT_DEGREE;
@@ -208,6 +223,5 @@ public class Clock extends View {
         xy[1] = (float) (mCenterY - pointerLength * Math.cos(degree));
         return xy;
     }
-
 
 }
